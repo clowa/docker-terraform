@@ -1,0 +1,28 @@
+FROM golang:alpine as build
+#LABEL maintainer="My Company Team <email@example.org>"
+ARG TERRAFORM_VERSION=UNSPECIFIED
+
+RUN apk add --no-cache git bash openssh
+
+ENV TF_DEV=true
+ENV TF_RELEASE=1
+
+WORKDIR $GOPATH/src/github.com/hashicorp/
+RUN git clone --depth 1 --branch "v${TERRAFORM_VERSION}" https://github.com/hashicorp/terraform
+WORKDIR $GOPATH/src/github.com/hashicorp/terraform
+RUN go install
+# RUN /bin/bash ./scripts/build.sh
+WORKDIR $GOPATH/bin/
+RUN cp terraform /bin/
+
+
+FROM alpine:latest as final
+#ARG TERRAFORM_VERSION=UNSPECIFIED
+
+#LABEL "com.hashicorp.terraform.version"="${TERRAFORM_VERSION}"
+
+RUN apk add --no-cache git openssh
+
+COPY --from=build ["/bin/terraform", "/bin/terraform"]
+
+ENTRYPOINT ["/bin/terraform"]

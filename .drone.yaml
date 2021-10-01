@@ -1,0 +1,80 @@
+---
+kind: pipeline
+type: kubernetes
+name: docker build
+
+trigger:
+  branch:
+    - master
+  event:
+    - cron
+  cron:
+    - nightly
+
+steps:
+  - name: docker-build
+    image: crazymax/docker
+    privileged: true
+    environment:
+      DOCKER_HUB_USERNAME:
+        from_secret: docker_hub_username
+      DOCKER_HUB_PASSWORD:
+        from_secret: docker_hub_password
+    commands:
+      - apk add --quiet --no-cache --upgrade jq curl
+      - echo "$DOCKER_HUB_PASSWORD" | docker login --username "$DOCKER_HUB_USERNAME" --password-stdin
+      - ./build.sh -l
+
+  - name: notification
+    image: appleboy/drone-telegram
+    settings:
+      to:
+        from_secret: telegram_user_id
+      token:
+        from_secret: telegram_api_token
+      format: markdown
+      message: >
+        message: >
+        {{#success build.status}}
+        ✅ Image build #{{build.number}} of `{{repo.name}}` succeeded.
+
+        ⏱ Took: {{since build.started}}
+
+        🌐 {{ build.link }}
+        {{else}}
+        ❌ Image build #{{build.number}} of `{{repo.name}}` failed.
+
+        ⏱ Took: {{since build.started}}
+
+        🌐 {{ build.link }}
+        {{/success}}
+    when:
+      status: [success, failure]
+
+---
+kind: secret
+name: docker_hub_username
+get:
+  path: docker-hub
+  name: username
+
+---
+kind: secret
+name: docker_hub_password
+get:
+  path: docker-hub
+  name: password
+
+---
+kind: secret
+name: telegram_user_id
+get:
+  path: drone-pipeline-telegram-secret
+  name: telegram-chatID
+
+---
+kind: secret
+name: telegram_api_token
+get:
+  path: drone-pipeline-telegram-secret
+  name: telegram-token

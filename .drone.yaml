@@ -6,10 +6,6 @@ name: docker build
 trigger:
   branch:
     - master
-  event:
-    - cron
-  cron:
-    - nightly
 
 steps:
   - name: docker-build

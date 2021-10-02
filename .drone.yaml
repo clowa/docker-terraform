@@ -3,15 +3,70 @@ kind: pipeline
 type: kubernetes
 name: docker build
 
+platform:
+  os: linux
+
 trigger:
   branch:
     - master
 
+volumes:
+  - name: docker
+    host:
+      path: /var/tmp/docker
+  - name: docker-ca
+    temp: {}
+  - name: docker-client
+    temp: {}
+
+services:
+  - name: docker
+    image: docker:dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    resources:
+      requests:
+        cpu: 1
+        memory: 512Mi
+      limits:
+        memory: 1Gi
+    ports:
+      - 2376
+    volumes:
+      - name: docker
+        path: /var/lib/docker
+      - name: docker-ca
+        path: /certs/ca
+      - name: docker-client
+        path: /certs/client
+
 steps:
+  - name: docker-healthcheck
+    image: docker:latest
+    volumes:
+      - name: docker-client
+        path: /certs/client
+    environment:
+      DOCKER_HOST: "tcp://127.0.0.1:2376"
+      DOCKER_TLS_CERTDIR: /certs
+    commands:
+      - |
+        while ! docker info > /dev/null 2>&1; do
+          echo "Docker does not seem to be running. Retry in 5 seconds"
+          sleep 5
+        done
+      - docker version
+
   - name: docker-build
     image: crazymax/docker
     privileged: true
+    volumes:
+      - name: docker-client
+        path: /certs/client
     environment:
+      DOCKER_HOST: "tcp://127.0.0.1:2376"
+      DOCKER_TLS_CERTDIR: /certs
       DOCKER_HUB_USERNAME:
         from_secret: docker_hub_username
       DOCKER_HUB_PASSWORD:
@@ -19,7 +74,7 @@ steps:
     commands:
       - apk add --quiet --no-cache --upgrade jq curl
       - echo "$DOCKER_HUB_PASSWORD" | docker login --username "$DOCKER_HUB_USERNAME" --password-stdin
-      - ./build.sh -l
+      - ./build.sh -l || exit 1
 
   - name: notification
     image: appleboy/drone-telegram
@@ -30,7 +85,6 @@ steps:
         from_secret: telegram_api_token
       format: markdown
       message: >
-        message: >
         {{#success build.status}}
         ✅ Image build #{{build.number}} of `{{repo.name}}` succeeded.
 

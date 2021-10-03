@@ -10,38 +10,67 @@ trigger:
   branch:
     - master
 
+volumes:
+  - name: docker
+    temp: {}
+
 services:
   - name: docker
-    image: docker:dind
+    image: docker:20.10.8-dind
     privileged: true
-    environment:
-      DOCKER_TLS_CERTDIR: ""
-    resources:
-      requests:
-        cpu: 1
-        memory: 512Mi
-      limits:
-        memory: 1Gi
     ports:
       - 2375
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    volumes:
+      - name: docker
+        path: /var/lib/docker
+    resources:
+      requests:
+        cpu: 2
+        memory: 512Mi
+      limits:
+        memory: 2Gi
+    commands:
+      - "dockerd-entrypoint.sh --mtu=1440"
 
 steps:
   - name: docker-healthcheck
-    image: docker:latest
+    image: docker:20.10.8
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""
     commands:
       - |
-        while ! docker info > /dev/null 2>&1; do
-          echo "Docker does not seem to be running. Retry in 5 seconds"
-          sleep 5
+        SLEEP_DURATION=5
+        MAX_ATTEMPTS=5
+        ATTEMPT_NUM=0
+        until docker info > /dev/null 2>&1
+        do
+          ATTEMPT_STR="$ATTEMPT_NUM/$MAX_ATTEMPTS"
+          if [[ "$ATTEMPT_NUM" == "$MAX_ATTEMPTS" ]] ;
+          then
+            echo "Attempt $ATTEMPT_STR failed. Giving up."
+            exit 1
+          else
+            echo "Docker does not seem to be running."
+            echo "Attempt $ATTEMPT_STR failed. Retrying in $SLEEP_DURATION seconds..."
+            ATTEMPT_NUM=$((ATTEMPT_NUM+1))
+            sleep "$SLEEP_DURATION"
+          fi
         done
       - docker version
 
+  - name: install-qemu
+    image: docker:20.10.8
+    environment:
+      DOCKER_HOST: "tcp://127.0.0.1:2375"
+      DOCKER_TLS_CERTDIR: ""
+    commands:
+      - docker run --privileged --rm tonistiigi/binfmt --install all
+
   - name: docker-build
     image: crazymax/docker
-    privileged: true
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""
@@ -52,9 +81,8 @@ steps:
     resources:
       requests:
         cpu: 0.5
-        memory: 128Mi
+        memory: 64Mi
     commands:
-      - docker run --privileged --rm tonistiigi/binfmt --install all
       - docker buildx create --use
       - apk add --quiet --no-cache --upgrade jq curl
       - echo "$DOCKER_HUB_PASSWORD" | docker login --username "$DOCKER_HUB_USERNAME" --password-stdin
@@ -71,15 +99,11 @@ steps:
       message: >
         {{#success build.status}}
         ✅ Image build #{{build.number}} of `{{repo.name}}` succeeded.
-
         ⏱ Took: {{since build.started}}
-
         🌐 {{ build.link }}
         {{else}}
         ❌ Image build #{{build.number}} of `{{repo.name}}` failed.
-
         ⏱ Took: {{since build.started}}
-
         🌐 {{ build.link }}
         {{/success}}
     when:

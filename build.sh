@@ -28,7 +28,8 @@ function invertArray() {
 
 DOCKER_IMAGE='clowa/terraform'
 
-PLATFORMS=("linux/386" "linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
+#PLATFORMS=("linux/386" "linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
+PLATFORMS=("linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
 
 while getopts :hla: flag
 do

@@ -41,6 +41,7 @@ do
           ## Only fetch latest releases
           LATEST=true
           TERRAFORM_VERSIONS=($(curl --silent https://api.github.com/repos/hashicorp/terraform/releases/latest | jq --raw-output '.name' | tr -d 'v'))
+          set -e
           ;;
         a)
           ## Get all GitHub releases
@@ -69,8 +70,4 @@ do
             --build-arg TERRAFORM_VERSION=${TF_VERSION} \
             --platform $(joinByChar ',' "${PLATFORMS[@]}") \
             --tag $DOCKER_IMAGE:${TF_VERSION} .
-            
-    if [[ $LATEST -eq "true" ]] && [[ $? -ne "0" ]]; then
-      exit 1
-    fi
 done

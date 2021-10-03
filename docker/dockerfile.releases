@@ -24,7 +24,8 @@ ARG TARGETARCH
 # - Verify that the zip file matches the expected checksum
 # - Extract the zip file so it can be run
 
-RUN apk add --quiet --no-cache git curl openssh gnupg perl-utils && \
+RUN apk --quiet --update-cache upgrade
+RUN apk add --quiet --no-cache --upgrade git curl openssh gnupg perl-utils && \
     curl --silent --remote-name https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${TARGETOS}_${TARGETARCH}.zip && \
     curl --silent --remote-name https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig && \
     curl --silent --remote-name https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS && \
@@ -42,7 +43,8 @@ ARG TERRAFORM_VERSION=UNSPECIFIED
 
 LABEL "com.hashicorp.terraform.version"="${TERRAFORM_VERSION}"
 
-RUN apk add --quiet --no-cache git openssh
+RUN apk --quiet --update-cache upgrade
+RUN apk add --quiet --no-cache --upgrade git openssh
 
 COPY --from=build ["/bin/terraform", "/bin/terraform"]
 

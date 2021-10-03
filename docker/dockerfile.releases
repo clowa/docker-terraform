@@ -10,7 +10,7 @@
 # This is intended to be run from the hooks/build script, which sets this
 # appropriately based on git tags.
 
-FROM --platform=$BUILDPLATFORM alpine:latest as build
+FROM --platform=$BUILDPLATFORM alpine:3.13 as build
 
 #LABEL maintainer="My Company Team <email@example.org>"
 ARG TERRAFORM_VERSION
@@ -37,7 +37,7 @@ RUN apk add --quiet --no-cache git curl openssh gnupg perl-utils && \
     unzip -qq terraform_${TERRAFORM_VERSION}_${TARGETOS}_${TARGETARCH}.zip -d /bin && \
     rm -f terraform_${TERRAFORM_VERSION}_${TARGETOS}_${TARGETARCH}.zip terraform_${TERRAFORM_VERSION}_SHA256SUMS*
 
-FROM alpine:latest as final
+FROM alpine:3.13 as final
 ARG TERRAFORM_VERSION=UNSPECIFIED
 
 LABEL "com.hashicorp.terraform.version"="${TERRAFORM_VERSION}"

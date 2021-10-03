@@ -54,6 +54,7 @@ steps:
         cpu: 0.5
         memory: 128Mi
     commands:
+      - docker run --privileged --rm tonistiigi/binfmt --install all
       - docker buildx create --use
       - apk add --quiet --no-cache --upgrade jq curl
       - echo "$DOCKER_HUB_PASSWORD" | docker login --username "$DOCKER_HUB_USERNAME" --password-stdin

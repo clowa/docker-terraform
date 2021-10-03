@@ -10,21 +10,12 @@ trigger:
   branch:
     - master
 
-volumes:
-  - name: docker
-    host:
-      path: /var/tmp/docker
-  - name: docker-ca
-    temp: {}
-  - name: docker-client
-    temp: {}
-
 services:
   - name: docker
     image: docker:dind
     privileged: true
     environment:
-      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_TLS_CERTDIR: ""
     resources:
       requests:
         cpu: 1
@@ -32,24 +23,14 @@ services:
       limits:
         memory: 1Gi
     ports:
-      - 2376
-    volumes:
-      - name: docker
-        path: /var/lib/docker
-      - name: docker-ca
-        path: /certs/ca
-      - name: docker-client
-        path: /certs/client
+      - 2375
 
 steps:
   - name: docker-healthcheck
     image: docker:latest
-    volumes:
-      - name: docker-client
-        path: /certs/client
     environment:
-      DOCKER_HOST: "tcp://127.0.0.1:2376"
-      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_HOST: "tcp://127.0.0.1:2375"
+      DOCKER_TLS_CERTDIR: ""
     commands:
       - |
         while ! docker info > /dev/null 2>&1; do
@@ -61,12 +42,9 @@ steps:
   - name: docker-build
     image: crazymax/docker
     privileged: true
-    volumes:
-      - name: docker-client
-        path: /certs/client
     environment:
-      DOCKER_HOST: "tcp://127.0.0.1:2376"
-      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_HOST: "tcp://127.0.0.1:2375"
+      DOCKER_TLS_CERTDIR: ""
       DOCKER_HUB_USERNAME:
         from_secret: docker_hub_username
       DOCKER_HUB_PASSWORD:

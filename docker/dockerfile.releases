@@ -39,7 +39,7 @@ RUN apk add --quiet --no-cache --upgrade git curl openssh gnupg perl-utils && \
     rm -f terraform_${TERRAFORM_VERSION}_${TARGETOS}_${TARGETARCH}.zip terraform_${TERRAFORM_VERSION}_SHA256SUMS* pgp_keys.asc
 
 FROM alpine:3.13 as final
-ARG TERRAFORM_VERSION=UNSPECIFIED
+ARG TERRAFORM_VERSION
 
 LABEL "com.hashicorp.terraform.version"="${TERRAFORM_VERSION}"
 

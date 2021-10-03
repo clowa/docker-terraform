@@ -1,6 +1,6 @@
 FROM golang:alpine as build
 #LABEL maintainer="My Company Team <email@example.org>"
-ARG TERRAFORM_VERSION=UNSPECIFIED
+ARG TERRAFORM_VERSION
 
 RUN apk --quiet --update-cache upgrade
 RUN apk add --quiet --no-cache --upgrade git bash openssh
@@ -18,7 +18,7 @@ RUN cp terraform /bin/
 
 
 FROM alpine:3.13 as final
-#ARG TERRAFORM_VERSION=UNSPECIFIED
+#ARG TERRAFORM_VERSION
 
 #LABEL "com.hashicorp.terraform.version"="${TERRAFORM_VERSION}"
 

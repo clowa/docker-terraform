@@ -49,6 +49,10 @@ steps:
         from_secret: docker_hub_username
       DOCKER_HUB_PASSWORD:
         from_secret: docker_hub_password
+    resources:
+      requests:
+        cpu: 0.5
+        memory: 128Mi
     commands:
       - docker buildx create --use
       - apk add --quiet --no-cache --upgrade jq curl

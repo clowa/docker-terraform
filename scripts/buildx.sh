@@ -26,10 +26,14 @@ function invertArray() {
   echo "${tmpArray[@]}"
 }
 
-DOCKER_IMAGE='clowa/terraform'
+if [ -z ${DOCKER_IMAGE+set} ]; then
+  DOCKER_IMAGE='clowa/terraform'
+fi
 
-#PLATFORMS=("linux/386" "linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
-PLATFORMS=("linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
+if [ -z ${PLATFORMS+set} ]; then
+  #PLATFORMS=("linux/386" "linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
+  PLATFORMS=("linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
+fi
 
 while getopts :hla: flag
 do

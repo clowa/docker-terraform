@@ -16,7 +16,7 @@ volumes:
 
 services:
   - name: docker
-    image: docker:dind
+    image: docker:20.10.8-dind
     privileged: true
     ports:
       - 2375
@@ -36,7 +36,7 @@ services:
 
 steps:
   - name: docker-healthcheck
-    image: docker:latest
+    image: docker:20.10.8
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""
@@ -62,7 +62,7 @@ steps:
       - docker version
 
   - name: install-qemu
-    image: docker:latest
+    image: docker:20.10.8
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""

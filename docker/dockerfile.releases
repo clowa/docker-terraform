@@ -32,8 +32,6 @@ RUN apk add --quiet --no-cache --upgrade git curl openssh gnupg perl-utils && \
     curl --silent --remote-name https://keybase.io/hashicorp/pgp_keys.asc && \
     gpg --import pgp_keys.asc && \
     gpg --verify terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig terraform_${TERRAFORM_VERSION}_SHA256SUMS && \
-    grep "${TARGETOS}_${TARGETARCH}" terraform_${TERRAFORM_VERSION}_SHA256SUMS >terraform_${TERRAFORM_VERSION}_SHA256SUMS_${TARGETOS}_${TARGETARCH} && \
-    shasum --help && \
     shasum --algorithm 256 --ignore-missing --check terraform_${TERRAFORM_VERSION}_SHA256SUMS && \
     unzip -qq terraform_${TERRAFORM_VERSION}_${TARGETOS}_${TARGETARCH}.zip -d /bin && \
     rm -f terraform_${TERRAFORM_VERSION}_${TARGETOS}_${TARGETARCH}.zip terraform_${TERRAFORM_VERSION}_SHA256SUMS* pgp_keys.asc

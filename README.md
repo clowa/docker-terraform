@@ -1,4 +1,4 @@
-[![Build Status](https://drone.k8s.clowa.de/api/badges/clowa/docker-terraform/status.svg)](https://ci.k8s.clowa.de/clowa/docker-terraform)
+[![Build Status](https://ci.k8s.clowa.de/api/badges/clowa/docker-terraform/status.svg)](https://ci.k8s.clowa.de/clowa/docker-terraform)
 
 # Overview
 

@@ -31,8 +31,7 @@ if [ -z ${DOCKER_IMAGE+set} ]; then
 fi
 
 if [ -z ${PLATFORMS+set} ]; then
-  #PLATFORMS=("linux/386" "linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
-  PLATFORMS=("linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
+  PLATFORMS=("linux/386" "linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
 fi
 
 while getopts :hla: flag

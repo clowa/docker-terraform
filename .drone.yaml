@@ -16,7 +16,7 @@ volumes:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind
+    image: docker:dind
     privileged: true
     ports:
       - 2375
@@ -36,33 +36,20 @@ services:
 
 steps:
   - name: docker-healthcheck
-    image: docker:20.10.8
+    image: docker:latest
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""
     commands:
       - |
-        SLEEP_DURATION=5
-        MAX_ATTEMPTS=5
-        ATTEMPT_NUM=0
-        until docker info > /dev/null 2>&1
-        do
-          ATTEMPT_STR="$ATTEMPT_NUM/$MAX_ATTEMPTS"
-          if [[ "$ATTEMPT_NUM" == "$MAX_ATTEMPTS" ]] ;
-          then
-            echo "Attempt $ATTEMPT_STR failed. Giving up."
-            exit 1
-          else
-            echo "Docker does not seem to be running."
-            echo "Attempt $ATTEMPT_STR failed. Retrying in $SLEEP_DURATION seconds..."
-            ATTEMPT_NUM=$((ATTEMPT_NUM+1))
-            sleep "$SLEEP_DURATION"
-          fi
+        while ! docker info > /dev/null 2>&1; do
+          echo "Docker does not seem to be running. Retry in 5 seconds"
+          sleep 5
         done
       - docker version
 
   - name: install-qemu
-    image: docker:20.10.8
+    image: docker:latest
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""
@@ -71,6 +58,7 @@ steps:
 
   - name: docker-build
     image: crazymax/docker
+    privileged: true
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""

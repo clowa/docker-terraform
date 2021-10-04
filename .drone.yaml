@@ -42,9 +42,22 @@ steps:
       DOCKER_TLS_CERTDIR: ""
     commands:
       - |
-        while ! docker info > /dev/null 2>&1; do
-          echo "Docker does not seem to be running. Retry in 5 seconds"
-          sleep 5
+        SLEEP_DURATION=5
+        MAX_ATTEMPTS=5
+        ATTEMPT_NUM=0
+        until docker info > /dev/null 2>&1
+        do
+          ATTEMPT_STR="$ATTEMPT_NUM/$MAX_ATTEMPTS"
+          if [[ "$ATTEMPT_NUM" == "$MAX_ATTEMPTS" ]] ;
+          then
+            echo "Attempt $ATTEMPT_STR failed. Giving up."
+            exit 1
+          else
+            echo "Docker does not seem to be running."
+            echo "Attempt $ATTEMPT_STR failed. Retrying in $SLEEP_DURATION seconds..."
+            ATTEMPT_NUM=$((ATTEMPT_NUM+1))
+            sleep "$SLEEP_DURATION"
+          fi
         done
       - docker version
 

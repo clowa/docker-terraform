@@ -1,10 +1,11 @@
 #! /bin/bash
 
-usage="$(basename "$0") [-l | -a] -- program to build docker images of terraform for multiple platforms.
+usage="$(basename "$0") [-l | -a | -s] -- program to build docker images of terraform for multiple platforms.
 
 where:
     -l  only build docker image of latest GitHub release
-    -a  build docker image of all available GitHub releases"
+    -a  build docker image of all available GitHub releases
+    -s  build docker image only on stable GitHub release"
 
 # function joinByChar() {
 #   local IFS="$1"
@@ -46,7 +47,7 @@ if [[ -z ${REPOSITORY+set} ]]; then
   exit 2
 fi
 
-while getopts :hla: flag
+while getopts :hlas flag
 do
     case "${flag}" in
         h)
@@ -63,7 +64,7 @@ do
           ## Get all GitHub releases
           VERSIONS=($(curl --silent https://api.github.com/repos/${ORGANIZATION}/${REPOSITORY}/releases | jq --raw-output '.[].name' | tr -d 'v'))
           ;;
-        *)
+        s)
           ## Filter out alpha and beta releases
           VERSIONS=($(curl --silent https://api.github.com/repos/${ORGANIZATION}/${REPOSITORY}/releases | jq --raw-output '.[]|select(.name|test("^v\\d*\\.\\d*\\.\\d*$"))|.name' | tr -d 'v'))
           ;;

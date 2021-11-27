@@ -6,11 +6,11 @@ where:
     -l  only build docker image of latest GitHub release
     -a  build docker image of all available GitHub releases"
 
-function joinByChar() {
-  local IFS="$1"
-  shift
-  echo "$*"
-}
+# function joinByChar() {
+#   local IFS="$1"
+#   shift
+#   echo "$*"
+# }
 
 function invertArray() {
   local array=("$@")
@@ -26,12 +26,24 @@ function invertArray() {
   echo "${tmpArray[@]}"
 }
 
-if [ -z ${DOCKER_IMAGE+set} ]; then
-  DOCKER_IMAGE='clowa/terraform'
+if [[ -z ${DOCKER_IMAGE+set} ]]; then
+  echo "Environment variable DOCKER_IMAGE not set. Run \"export DOCKER_IMAGE=containous/whoami\""
+  exit 2
 fi
 
-if [ -z ${PLATFORMS+set} ]; then
-  PLATFORMS=("linux/386" "linux/amd64" "linux/arm/v6" "linux/arm/v7" "linux/arm64/v8")
+if [[ -z ${PLATFORMS+set} ]]; then
+  echo "Environment variable PLATFORMS not set. Run \"export PLATFORMS=\"linux/amd64,linux/arm64\""
+  exit 2
+fi
+
+if [[ -z ${ORGANIZATION+set} ]]; then
+  echo "Environment variable ORGANIZATION not set. Run \"export ORGANIZATION=hashicorp\""
+  exit 2
+fi
+
+if [[ -z ${REPOSITORY+set} ]]; then
+  echo "Environment variable REPOSITORY not set. Run \"export REPOSITORY=terraform\""
+  exit 2
 fi
 
 while getopts :hla: flag
@@ -44,34 +56,35 @@ do
         l)
           ## Only fetch latest releases
           LATEST=true
-          TERRAFORM_VERSIONS=($(curl --silent https://api.github.com/repos/hashicorp/terraform/releases/latest | jq --raw-output '.name' | tr -d 'v'))
+          VERSIONS=($(curl --silent https://api.github.com/repos/${ORGANIZATION}/${REPOSITORY}/releases/latest | jq --raw-output '.name' | tr -d 'v'))
           set -e
           ;;
         a)
           ## Get all GitHub releases
-          TERRAFORM_VERSIONS=($(curl --silent https://api.github.com/repos/hashicorp/terraform/releases | jq --raw-output '.[].name' | tr -d 'v'))
+          VERSIONS=($(curl --silent https://api.github.com/repos/${ORGANIZATION}/${REPOSITORY}/releases | jq --raw-output '.[].name' | tr -d 'v'))
           ;;
         *)
           ## Filter out alpha and beta releases
-          TERRAFORM_VERSIONS=($(curl --silent https://api.github.com/repos/hashicorp/terraform/releases | jq --raw-output '.[]|select(.name|test("^v[\\d]*\\.[\\d]*\\.[\\d]*$"))|.name' | tr -d 'v'))
+          VERSIONS=($(curl --silent https://api.github.com/repos/${ORGANIZATION}/${REPOSITORY}/releases | jq --raw-output '.[]|select(.name|test("^v\\d*\\.\\d*\\.\\d*$"))|.name' | tr -d 'v'))
           ;;
     esac
 done
 
 ## Invert array 
-INVERTED_TF_VERSIONS=($(invertArray ${TERRAFORM_VERSIONS[@]}))
+INVERTED_VERSIONS=($(invertArray ${VERSIONS[@]}))
 
-for TF_VERSION in "${INVERTED_TF_VERSIONS[@]}"
+for VERSION in "${INVERTED_VERSIONS[@]}"
 do
     echo "Build Info:"
-    echo "  TF_VERSION: ${TF_VERSION}"
-    echo "  Platforms: $(joinByChar ',' "${PLATFORMS[@]}")"
-    echo "  Tag: $DOCKER_IMAGE:${TF_VERSION}"
+    echo "  VERSION: ${VERSION}"
+    echo "  Platforms: ${PLATFORMS}"
+    echo "  Tag: ${DOCKER_IMAGE}:${VERSION}"
 
     docker buildx build \
-            --push \
-            --file ./docker/dockerfile.releases \
-            --build-arg TERRAFORM_VERSION=${TF_VERSION} \
-            --platform $(joinByChar ',' "${PLATFORMS[@]}") \
-            --tag $DOCKER_IMAGE:${TF_VERSION} .
+      --push \
+      --file ./docker/dockerfile.releases \
+      --build-arg TERRAFORM_VERSION=${VERSION} \
+      --platform ${PLATFORMS} \
+      --tag $DOCKER_IMAGE:${VERSION} \
+      .
 done

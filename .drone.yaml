@@ -78,6 +78,10 @@ steps:
         from_secret: docker_hub_username
       DOCKER_HUB_PASSWORD:
         from_secret: docker_hub_password
+      DOCKER_IMAGE: clowa/terraform
+      PLATFORMS: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
+      ORGANIZATION: hashicorp
+      REPOSITORY: terraform
     resources:
       requests:
         cpu: 0.5

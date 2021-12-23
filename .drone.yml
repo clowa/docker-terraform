@@ -16,7 +16,8 @@ volumes:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind
+    image: docker:20-dind
+    pull: always
     privileged: true
     ports:
       - 2375
@@ -36,7 +37,7 @@ services:
 
 steps:
   - name: docker-healthcheck
-    image: docker:20.10.8
+    image: docker:20-dind
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""
@@ -62,7 +63,7 @@ steps:
       - docker version
 
   - name: install-qemu
-    image: docker:20.10.8
+    image: docker:20-dind
     environment:
       DOCKER_HOST: "tcp://127.0.0.1:2375"
       DOCKER_TLS_CERTDIR: ""
@@ -142,6 +143,6 @@ get:
   name: telegram-token
 ---
 kind: signature
-hmac: a3e24a9a2a131226e1da5460731b2b3091f786f3514e952a246301cb76768af8
+hmac: 2ad2d610410f07762d9bda5748a3912382b5822cafe2996fd2dbc9224d3189c4
 
 ...

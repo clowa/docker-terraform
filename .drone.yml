@@ -92,7 +92,7 @@ steps:
       - docker buildx create --use
       - apk add --quiet --no-cache --upgrade jq curl
       - echo "$DOCKER_HUB_PASSWORD" | docker login --username "$DOCKER_HUB_USERNAME" --password-stdin
-      - ./scripts/buildx.sh -l || exit 1
+      - ./build.sh -l || exit 1
 
   - name: notification
     image: appleboy/drone-telegram
@@ -145,6 +145,6 @@ get:
   name: telegram-token
 ---
 kind: signature
-hmac: 7175e0a17e810cb067605aaac167b361a9a586b086d9af2bd6450d09dc72f6ef
+hmac: 83d2f3d394fc09a033d9b43bc0b61b3473573a06778f8408e587895ce0f5e32e
 
 ...

@@ -12,7 +12,7 @@ WORKDIR $GOPATH/src/github.com/hashicorp/
 RUN git clone --depth 1 --branch "v${TERRAFORM_VERSION}" https://github.com/hashicorp/terraform
 WORKDIR $GOPATH/src/github.com/hashicorp/terraform
 RUN go install
-# RUN /bin/bash ./scripts/scripts/buildx.sh
+
 WORKDIR $GOPATH/bin/
 RUN cp terraform /bin/
 

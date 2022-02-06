@@ -1,4 +1,5 @@
-[![Build Status](https://ci.k8s.clowa.de/api/badges/clowa/docker-terraform/status.svg)](https://ci.k8s.clowa.de/clowa/docker-terraform)
+![Get latest release version](https://github.com/clowa/docker-terraform/actions/workflows/get-latest-release.yml/badge.svg)
+![Build docker images](https://github.com/clowa/docker-terraform/actions/workflows/docker-buildx.yml/badge.svg)
 
 # Overview
 
@@ -12,10 +13,7 @@ Supported platforms:
 - linux/arm/v7
 - linux/arm64/v8
 
-# CI setups for Drone
+# CI setups
 
-Fire this command to setup the cron schedule.
-
-```bash
-drone cron add "clowa/docker-terraform" "nightly" "0 0 1 * * *"
-```
+1. Checks every day if a new release is available at the [terraform repository](https://github.com/hashicorp/terraform)
+2. Build new docker images with the new release.

@@ -17,7 +17,7 @@ jobs:
 
       - name: Get version
         id: version
-        run: echo ::set-output name=version::$(cat version.txt | tr -d 'v')
+        run: echo "version=$(cat version.txt | tr -d 'v')" >> $GITHUB_OUTPUT
 
       - name: Powershell version
         run: echo ${{ steps.version.outputs.version }}

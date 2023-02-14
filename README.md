@@ -1,5 +1,6 @@
 ![Get latest release version](https://github.com/clowa/docker-terraform/actions/workflows/get-latest-release.yml/badge.svg)
 ![Build docker images](https://github.com/clowa/docker-terraform/actions/workflows/docker-buildx.yml/badge.svg)
+![Check base image update](https://github.com/clowa/docker-terraform/actions/workflows/check-base-image-update.yml/badge.svg)
 
 # Overview
 

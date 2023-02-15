@@ -5,7 +5,7 @@ on:
 
 env:
   image: clowa/terraform:latest
-  base-image: library/alpine:3.13
+  base-image: library/alpine:3.17
 
 jobs:
   check-base-image:

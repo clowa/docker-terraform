@@ -17,7 +17,7 @@ WORKDIR $GOPATH/bin/
 RUN cp terraform /bin/
 
 
-FROM alpine:3.13 as final
+FROM alpine:3.17 as final
 #ARG TERRAFORM_VERSION
 
 #LABEL "com.hashicorp.terraform.version"="${TERRAFORM_VERSION}"

@@ -5,8 +5,9 @@ on:
     types:
       - base-image-update
   push:
+    branches:
+      - main
     paths:
-      - ".github/workflows/docker-*"
       - "version.txt"
       - "docker/**"
   pull_request:

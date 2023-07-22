@@ -1,12 +1,20 @@
 name: Build docker images
+
 on:
   repository_dispatch:
     types:
       - base-image-update
   push:
     paths:
+      - ".github/workflows/docker-*"
       - "version.txt"
       - "docker/**"
+  pull_request:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: ${{ vars.DOCKER_USERNAME }}/terraform
 
 jobs:
   docker-buildx:
@@ -32,10 +40,11 @@ jobs:
       - name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
 
-      - name: Login to DockerHub
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push
@@ -44,21 +53,20 @@ jobs:
         with:
           context: .
           file: ./docker/dockerfile.releases
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           platforms: |
             linux/386
             linux/amd64
-            linux/arm/v6
+            linux/arm64
             linux/arm/v7
             linux/arm64/v8
           build-args: TERRAFORM_VERSION=${{ steps.version.outputs.version }}
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/terraform:latest
-            ${{ secrets.DOCKER_USERNAME }}/terraform:${{ steps.version.outputs.version }}
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/terraform:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/terraform:buildcache,mode=max
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
 
       - name: Send telegram notification
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/telegram-action@v0.1.1
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -71,6 +79,6 @@ jobs:
             🔧 Build status:  ${{ steps.docker_build.outcome }}
 
             📚 Repository: [ ${{ github.repository }} ](https://github.com/${{ github.repository }})
-            📦 Image digest: ${{ steps.docker_build.outputs.digest }}
+            📦 Image digest: ```${{ steps.docker_build.outputs.digest }}```
 
-            🐳 See new image on [Docker hub](https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/terraform/tags)
+            🐳 See new image on [Docker hub](https://hub.docker.com/r/${{ env.IMAGE_NAME }}/tags)

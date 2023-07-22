@@ -6,6 +6,7 @@ on:
       - base-image-update
   push:
     paths:
+      - ".github/workflows/docker-*"
       - "version.txt"
       - "docker/**"
   pull_request:
@@ -30,7 +31,7 @@ jobs:
         run: echo ${{ steps.version.outputs.version }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         id: buildx
@@ -56,7 +57,7 @@ jobs:
           platforms: |
             linux/386
             linux/amd64
-            linux/arm/v6
+            linux/arm64
             linux/arm/v7
             linux/arm64/v8
           build-args: TERRAFORM_VERSION=${{ steps.version.outputs.version }}

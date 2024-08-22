@@ -55,6 +55,8 @@ jobs:
           context: .
           file: ./docker/dockerfile.releases
           push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max`
           platforms: |
             linux/386
             linux/amd64
